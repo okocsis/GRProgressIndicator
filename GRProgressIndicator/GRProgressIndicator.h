@@ -19,6 +19,9 @@
 
 @property (nonatomic, assign) GRProgressIndicatorTheme_t theme;
 
+@property CGFloat borderWidth;
+@property CGFloat cornerRadius;
+
 - (void)startAnimation:(id)sender;
 - (void)stopAnimation:(id)sender;
 

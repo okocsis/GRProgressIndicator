@@ -12,10 +12,15 @@ typedef enum GRProgressIndicatorTheme {
     GRProgressIndicatorThemeGreen = 2,
     GRProgressIndicatorThemeRed = 3,
     GRProgressIndicatorThemePink = 4,
-    GRProgressIndicatorThemeOrange = 5
+    GRProgressIndicatorThemeOrange = 5,
+    GRProgressIndicatorThemeSopreso = 6
 } GRProgressIndicatorTheme_t;
 
 /**** these constants define the colors for the themes ****/
+
+// progress bar gradient colors from top to bottom, sopreso
+#define kProgressBarSopresoColor [NSColor colorWithCalibratedRed: (1.f) green: (204.f/255.f) blue: (51.f/255.f) alpha: (1.f)]
+
 
 // progress bar gradient colors from top to bottom, aqua
 #define kProgressBarGradientColor0 [NSColor colorWithCalibratedRed: 0.635 green: 0.766 blue: 0.957 alpha: 1]
@@ -67,11 +72,11 @@ typedef enum GRProgressIndicatorTheme {
 #define kProgressBarInactiveGradientColor4 [NSColor colorWithCalibratedRed: 0.53 green: 0.587 blue: 0.662 alpha: 1]
 
 // progress bar inner shadow, aqua
-#define kProgressBarInnerShadowColor [NSColor colorWithCalibratedRed: 1 green: 1 blue: 1 alpha: 0.293]
+#define kProgressBarInnerShadowColor [NSColor colorWithCalibratedRed: 1 green: 1 blue: 1 alpha: 0.0]
 
 // progress bar inner shadow, graphite
-#define kProgressBarGraphiteInnerShadowColor [NSColor colorWithCalibratedRed: 0.776 green: 0.801 blue: 0.828 alpha: 1]
+#define kProgressBarGraphiteInnerShadowColor [NSColor colorWithCalibratedRed: 0.776 green: 0.801 blue: 0.828 alpha: 0]
 
 // line after progress bar gradient colors from top to bottom
-#define kProgressBarProgressLineGradient0 [NSColor colorWithCalibratedRed: 0.742 green: 0.742 blue: 0.742 alpha: 1]
-#define kProgressBarProgressLineGradient1 [NSColor colorWithCalibratedRed: 0.463 green: 0.463 blue: 0.463 alpha: 1]
+#define kProgressBarProgressLineGradient0 [NSColor colorWithCalibratedRed: 0.742 green: 0.742 blue: 0.742 alpha: 0]
+#define kProgressBarProgressLineGradient1 [NSColor colorWithCalibratedRed: 0.463 green: 0.463 blue: 0.463 alpha: 0]

@@ -45,7 +45,7 @@
 - (IBAction)startGR:(id)sender {
     if(_grTimer) return;
     
-    [self.grProgress startAnimation:nil];
+//    [self.grProgress startAnimation:nil];
     _grDoubleValue = 0;
     _grTimer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(updateGRProgress:) userInfo:nil repeats:YES];
 }
@@ -58,7 +58,7 @@
     if(_grDoubleValue >= 100) {
         [_grTimer invalidate];
         _grTimer = nil;
-        [self.grProgress stopAnimation:nil];
+//        [self.grProgress stopAnimation:nil];
     }
 }
 
@@ -73,9 +73,15 @@
         self.grProgress.theme = GRProgressIndicatorThemeOrange;
     } else if([self.themeSelect.selectedItem.title isEqualToString:@"Pink"]) {
         self.grProgress.theme = GRProgressIndicatorThemePink;
+    } else if([self.themeSelect.selectedItem.title isEqualToString:@"Sopreso"]) {
+        self.grProgress.theme = GRProgressIndicatorThemeSopreso;
     } else {
         self.grProgress.theme = GRProgressIndicatorThemeDefault;
     }
+}
+-(void)awakeFromNib
+{
+    [self.window setOpaque:NO];
 }
 
 @end

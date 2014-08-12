@@ -13,6 +13,9 @@
 // progress bar corner radius
 #define kProgressBarCornerRadius 3.0
 
+// progress bar corner radius Sopreso
+#define kProgressBarCornerRadiusSopreso 5.f
+
 // defines the width and spacing of the "water" particles
 #define kParticleWidth 34.0
 #define kParticleSpacing 15.0
@@ -29,6 +32,8 @@
 
 @property (nonatomic, assign) double internalDoubleValue;
 
+// defines if we are currently animating or not
+@property (atomic) BOOL animating;
 @end
 
 @implementation GRProgressIndicator
@@ -72,8 +77,7 @@
     NSColor *_inactiveGradientColor3;
     NSColor *_inactiveGradientColor4;
     
-    // defines if we are currently animating or not
-    BOOL _animating;
+    
     
     // animation counter
     int _currentAnimationStep;
@@ -99,6 +103,9 @@
         self.minValue = 0;
         self.maxValue = 100;
         self.doubleValue = 0;
+        
+        _borderWidth = 2.f;
+        _cornerRadius = 5.f;
     }
     return self;
 }
@@ -118,6 +125,23 @@
     // using them here, that's why I've decided to keep setting "_graphiteGradientColor..."
     // and "_inactiveGradientColor..." in all cases
     switch (self.theme) {
+        case GRProgressIndicatorThemeSopreso:
+            _gradientColor0 = kProgressBarSopresoColor;
+            _gradientColor1 = kProgressBarSopresoColor;
+            _gradientColor2 = kProgressBarSopresoColor;
+            _gradientColor3 = kProgressBarSopresoColor;
+            _gradientColor4 = kProgressBarSopresoColor;
+            _graphiteGradientColor0 = kProgressBarSopresoColor;
+            _graphiteGradientColor1 = kProgressBarSopresoColor;
+            _graphiteGradientColor2 = kProgressBarSopresoColor;
+            _graphiteGradientColor3 = kProgressBarSopresoColor;
+            _graphiteGradientColor4 = kProgressBarSopresoColor;
+            _inactiveGradientColor0 = kProgressBarSopresoColor;
+            _inactiveGradientColor1 = kProgressBarSopresoColor;
+            _inactiveGradientColor2 = kProgressBarSopresoColor;
+            _inactiveGradientColor3 = kProgressBarSopresoColor;
+            _inactiveGradientColor4 = kProgressBarSopresoColor;
+            
         case GRProgressIndicatorThemeForceGraphite:
             _gradientColor0 = kProgressBarGraphiteGradientColor0;
             _gradientColor1 = kProgressBarGraphiteGradientColor1;
@@ -314,17 +338,19 @@
 // animation thread loop
 - (void)render:(id)sender
 {
-    @autoreleasepool {
+    @autoreleasepool
+    {
         
         // we are now animating
         _animating = YES;
         
         // animation loop
-        while (_animating) {
+        while (_animating)
+        {
             // the animation happens until it's walked back the width of a particle,
             // when this is the case, the frame will look the same as in the start, so we go back and loop
             if(_currentAnimationStep >= kParticleWidth) _currentAnimationStep = 0;
-
+            
             _currentAnimationStep++;
             
             // render the view
@@ -341,23 +367,82 @@
 
 - (void)drawRect:(NSRect)dirtyRect
 {
-    // draw bezel using nine images
-    NSDrawNinePartImage(dirtyRect, _bezelTopLeftCorner, _bezelTopEdgeFill, _bezelTopRightCorner, _bezelLeftEdgeFill, _bezelCenterFill, _bezelRightEdgeFill, _bezelBottomLeftCorner, _bezelBottomEdgeFill, _bezelBottomRightCorner, NSCompositeSourceOver, 1.0, NO);
-    
-    // this will limit our drawing to the inside of the bezel
-    NSRect clipRect = NSMakeRect(1, 2, NSWidth(self.frame)-2, NSHeight([self progressBarRect]));
-    [[NSBezierPath bezierPathWithRoundedRect:clipRect xRadius:kProgressBarCornerRadius yRadius:kProgressBarCornerRadius] addClip];
-    
-    // draw progress bar
-    [self drawProgressBar];
-    
-    // draw particle animation step if needed
-    if(_animating) {
-        if (!self.isIndeterminate) {
-            [self drawAnimationStep];
-        } else {
-            [self drawIndeterminateAnimationStep];
+    if (self.theme != GRProgressIndicatorThemeSopreso)
+    {
+        // draw bezel using nine images
+        NSDrawNinePartImage(dirtyRect, _bezelTopLeftCorner, _bezelTopEdgeFill, _bezelTopRightCorner, _bezelLeftEdgeFill, _bezelCenterFill, _bezelRightEdgeFill, _bezelBottomLeftCorner, _bezelBottomEdgeFill, _bezelBottomRightCorner, NSCompositeSourceOver, 1.0, NO);
+        
+        // this will limit our drawing to the inside of the bezel
+        NSRect clipRect = NSMakeRect(1, 2, NSWidth(self.frame)-2, NSHeight([self progressBarRect]));
+        [[NSBezierPath bezierPathWithRoundedRect:clipRect xRadius:kProgressBarCornerRadius yRadius:kProgressBarCornerRadius] addClip];
+        
+        // draw progress bar
+        [self drawProgressBar];
+        
+        // draw particle animation step if needed
+        if(_animating) {
+            if (!self.isIndeterminate) {
+                [self drawAnimationStep];
+            } else {
+                [self drawIndeterminateAnimationStep];
+            }
         }
+    }
+    else // Sopreso code
+    {
+        CGContextRef ctx = [[NSGraphicsContext currentContext] graphicsPort];
+        
+        NSRect borderRect =  NSMakeRect(
+                                        NSMinX(dirtyRect) + (_borderWidth / 2.f),
+                                        NSMinY(dirtyRect) + (_borderWidth / 2.f),
+                                        NSWidth(dirtyRect) - _borderWidth,
+                                        NSHeight(dirtyRect) - _borderWidth
+                                        );
+        
+        CGRect rectInTheMiddle = CGRectMake(NSMidX(borderRect) - 20.f,
+                                            NSMinY(borderRect)+1.f,
+                                            50.f,
+                                            22.f);
+        NSString * percentStr = [NSString stringWithFormat:@"%d%%",(int)round(_doubleValue) ];
+        
+        CGContextSaveGState(ctx);
+        
+        [percentStr drawInRect:rectInTheMiddle withAttributes:@{
+                                                                NSFontAttributeName: [NSFont fontWithName:@"HelveticaNeue-Bold" size:18.7f],
+                                                                NSForegroundColorAttributeName: [NSColor whiteColor]
+                                                                }];
+        CGContextRestoreGState(ctx);
+        CGContextSaveGState(ctx);
+        
+        CGPathRef roundedRectPath = CGPathCreateWithRoundedRect(borderRect, _cornerRadius, _cornerRadius, NULL);
+        
+        CGContextAddPath(ctx, roundedRectPath);
+        CGContextClip(ctx);
+        // drawing bar
+        CGRect barRect = borderRect;
+        double scaledDoubleValue = _internalDoubleValue*(_maxValue-_minValue)/_maxValue-_minValue;
+        barRect.size.width = round(scaledDoubleValue/_maxValue*NSWidth(self.frame));
+        [kProgressBarSopresoColor setFill];
+        CGContextFillRect(ctx, barRect);
+        CGContextClipToRect(ctx, barRect);
+        
+        CGContextSetBlendMode(ctx, kCGBlendModeClear);
+        
+        [percentStr drawInRect:rectInTheMiddle withAttributes:@{
+                                                                  NSFontAttributeName: [NSFont fontWithName:@"HelveticaNeue-Bold" size:18.7f],
+                                                                  NSForegroundColorAttributeName: [NSColor clearColor]
+                                                                  }];
+        
+        //drawing border
+        CGContextRestoreGState(ctx);
+        CGContextAddPath(ctx, roundedRectPath);
+        CGFloat white[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+        CGContextSetStrokeColor(ctx, white);
+        CGContextSetLineWidth(ctx, _borderWidth);
+        CGContextStrokePath(ctx);
+        
+        
+        
     }
 }
 
@@ -369,7 +454,8 @@
     NSRect progressBarRect = [self progressBarRect];
     
     // the progress bar innner shadow
-    if (!_progressBarInnerShadow) {
+    if (!_progressBarInnerShadow)
+    {
         _progressBarInnerShadow = [[NSShadow alloc] init];
         
         [_progressBarInnerShadow setShadowOffset: NSMakeSize(0.1, -1.1)];
@@ -384,29 +470,29 @@
                 [_progressBarInnerShadow setShadowColor: kProgressBarGraphiteInnerShadowColor];
                 
                 _progressBarGradient = [[NSGradient alloc] initWithColorsAndLocations:
-                            _graphiteGradientColor0, 0.0,
-                            _graphiteGradientColor1, 0.48,
-                            _graphiteGradientColor2, 0.49,
-                            _graphiteGradientColor3, 0.82,
-                            _graphiteGradientColor4, 1.0, nil];
+                                        _graphiteGradientColor0, 0.0,
+                                        _graphiteGradientColor1, 0.48,
+                                        _graphiteGradientColor2, 0.49,
+                                        _graphiteGradientColor3, 0.82,
+                                        _graphiteGradientColor4, 1.0, nil];
             } else {
                 [_progressBarInnerShadow setShadowColor: kProgressBarInnerShadowColor];
                 
                 _progressBarGradient = [[NSGradient alloc] initWithColorsAndLocations:
-                            _gradientColor0, 0.0,
-                            _gradientColor1, 0.48,
-                            _gradientColor2, 0.49,
-                            _gradientColor3, 0.82,
-                            _gradientColor4, 1.0, nil];
+                                        _gradientColor0, 0.0,
+                                        _gradientColor1, 0.48,
+                                        _gradientColor2, 0.49,
+                                        _gradientColor3, 0.82,
+                                        _gradientColor4, 1.0, nil];
             }
         } else {
             [_progressBarInnerShadow setShadowColor: kProgressBarInnerShadowColor];
             
             _progressBarGradient = [[NSGradient alloc] initWithColorsAndLocations:
-                        _inactiveGradientColor0, 0.0,
-                        _inactiveGradientColor1, 0.48,
-                        _inactiveGradientColor2, 0.49,
-                        _inactiveGradientColor3, 1.0, nil];
+                                    _inactiveGradientColor0, 0.0,
+                                    _inactiveGradientColor1, 0.48,
+                                    _inactiveGradientColor2, 0.49,
+                                    _inactiveGradientColor3, 1.0, nil];
         }
     }
     
@@ -439,16 +525,14 @@
     [NSGraphicsContext restoreGraphicsState];
     
     // draw line after progress bar
-
+    
     if(!_progressBarLineGradient) _progressBarLineGradient = [[NSGradient alloc] initWithStartingColor: kProgressBarProgressLineGradient0 endingColor: kProgressBarProgressLineGradient1];
-
+    
     NSBezierPath *progressLinePath = [NSBezierPath bezierPathWithRect: NSMakeRect(NSWidth(progressBarRect)+1, progressBarRect.origin.y, 1, NSHeight(progressBarRect))];
     [_progressBarLineGradient drawInBezierPath: progressLinePath angle: 90];
 }
-
-
 // this method is responsible of drawing the aqua "water" particles animation
-- (void)drawAnimationStep
+- (void)drawAnimationStepSopreso
 {
     // initialize colors and gradient only once
     if(!_particleGrad1) {
@@ -456,7 +540,7 @@
         _particleGrad2 = [NSColor colorWithCalibratedRed: 1 green: 1 blue: 1 alpha: 0];
         _particleGradient = [[NSGradient alloc] initWithStartingColor: _particleGrad1 endingColor: _particleGrad2];
     }
-
+    
     // get progress rect and check if it's empty
     NSRect progressBarRect = [self progressBarRect];
     NSBezierPath *progressPath = [NSBezierPath bezierPathWithRoundedRect:progressBarRect xRadius:kProgressBarCornerRadius yRadius:kProgressBarCornerRadius];
@@ -486,8 +570,54 @@
         NSPoint gradientPoint = NSMakePoint(particleX+17, NSHeight(self.frame)/2.0);
         NSGradientDrawingOptions options = NSGradientDrawsBeforeStartingLocation | NSGradientDrawsAfterEndingLocation;
         [_particleGradient drawFromCenter: gradientPoint radius: 0
-                        toCenter: gradientPoint radius: 12.72
-                         options: options];
+                                 toCenter: gradientPoint radius: 12.72
+                                  options: options];
+        
+        [NSGraphicsContext restoreGraphicsState];
+    }
+}
+
+// this method is responsible of drawing the aqua "water" particles animation
+- (void)drawAnimationStep
+{
+    // initialize colors and gradient only once
+    if(!_particleGrad1) {
+        _particleGrad1 = [NSColor colorWithCalibratedRed: 1 green: 1 blue: 1 alpha: 0.07];
+        _particleGrad2 = [NSColor colorWithCalibratedRed: 1 green: 1 blue: 1 alpha: 0];
+        _particleGradient = [[NSGradient alloc] initWithStartingColor: _particleGrad1 endingColor: _particleGrad2];
+    }
+    
+    // get progress rect and check if it's empty
+    NSRect progressBarRect = [self progressBarRect];
+    NSBezierPath *progressPath = [NSBezierPath bezierPathWithRoundedRect:progressBarRect xRadius:kProgressBarCornerRadius yRadius:kProgressBarCornerRadius];
+    // if the rect is empty we don't do anything
+    if ([progressPath isEmpty]) return;
+    
+    // limits the drawing of the particles to be only inside the progress area
+    [progressPath addClip];
+    
+    // calculate how many particles we can fit inside the progress rect and add some extra for good luck :P
+    int particlePitch = round(NSWidth(progressBarRect)/kParticleWidth)+2;
+    
+    // value used to calculate the X position of a particle
+    CGFloat particleDelta = kParticleWidth+kParticleSpacing-kParticleWidth/2;
+    
+    for (int i = 0; i < particlePitch; i++) {
+        // calculate X position of particle
+        CGFloat particleX = (i*particleDelta)-_currentAnimationStep;
+        
+        // make circle used do draw the particle's gradient
+        NSBezierPath *particlePath = [NSBezierPath bezierPathWithOvalInRect: NSMakeRect(particleX, 3, kParticleWidth, 15)];
+        [NSGraphicsContext saveGraphicsState];
+        [[NSGraphicsContext currentContext] setCompositingOperation:NSCompositePlusLighter];
+        [particlePath addClip];
+        
+        // draw particle gradient
+        NSPoint gradientPoint = NSMakePoint(particleX+17, NSHeight(self.frame)/2.0);
+        NSGradientDrawingOptions options = NSGradientDrawsBeforeStartingLocation | NSGradientDrawsAfterEndingLocation;
+        [_particleGradient drawFromCenter: gradientPoint radius: 0
+                                 toCenter: gradientPoint radius: 12.72
+                                  options: options];
         
         [NSGraphicsContext restoreGraphicsState];
     }
@@ -514,7 +644,7 @@
     
     NSRect progressBarRect = [self progressBarRect];
     int particlePitch = round(NSWidth(progressBarRect)/kIndeterminateParticleWidth)+2;
-
+    
     CGFloat particleDelta = kIndeterminateParticleWidth+kIndeterminateParticleSpacing-kIndeterminateParticleWidth/2;
     
     for (int i = 0; i < particlePitch; i++) {
